@@ -78,13 +78,13 @@ pub enum Error {
     /// across `create_escrow`'s transfer (a lying or short-delivering
     /// token) — see docs/threat-model.md T5.
     BalanceMismatch = 6,
-    InvalidBatchSize = 9,
-    InvalidBatchItem0 = 10,
-    InvalidBatchItem1 = 11,
-    InvalidBatchItem2 = 12,
-    InvalidBatchItem3 = 13,
-    InvalidBatchItem4 = 14,
-    BatchAmountOverflow = 15,
+    InvalidBatchSize = 13,
+    InvalidBatchItem0 = 14,
+    InvalidBatchItem1 = 15,
+    InvalidBatchItem2 = 16,
+    InvalidBatchItem3 = 17,
+    InvalidBatchItem4 = 18,
+    BatchAmountOverflow = 19,
 }
 
 #[contract]
