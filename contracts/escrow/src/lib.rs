@@ -68,9 +68,9 @@ pub enum Error {
     /// across `create_escrow`'s transfer (a lying or short-delivering
     /// token) — see docs/threat-model.md T5.
     BalanceMismatch = 6,
-    AcceptanceRequired = 7,
-    AcceptanceNotConfigured = 8,
-    AlreadyAccepted = 9,
+    AcceptanceRequired = 9,
+    AcceptanceNotConfigured = 10,
+    AlreadyAccepted = 11,
 }
 
 #[contract]
