@@ -146,6 +146,15 @@
   repo's.
 
 ## Changelog
+- 2026-10-17 — Issue #63 (Phase E6): added SDK `getEvents` pagination and
+  typed lifecycle-event decoding, preserving unknown topic variants for
+  forward compatibility. Added cursor-resumable serial polling with
+  handler back-pressure and typed RPC-retention errors. Committed Soroban
+  XDR event fixtures cover decoding, filters, unknown topics, cursor
+  resume, retention errors, and stopping. Bumped the additive SDK surface
+  from 0.3.0 to 0.4.0. SDK typecheck/build and contract tests/build pass;
+  lifecycle events remain unavailable until issue #9 changes the contract.
+
 - 2026-09-09 — Repo created as part of the DocForum 3-repo org split.
 - 2026-10-09 — Phase E6 started: added `.github/workflows/release-sdk.yml`
   (tag-triggered `sdk-v*` build/test/`npm publish --provenance` + GitHub
