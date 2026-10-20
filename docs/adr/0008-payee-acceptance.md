@@ -1,4 +1,4 @@
-# ADR 0005: Opt-in payee acceptance
+# ADR 0008: Opt-in payee acceptance
 
 **Status:** Accepted for issue #25  
 **Date:** 2026-10-16
@@ -6,8 +6,8 @@
 ## Decision
 
 Escrow creation can opt into a payee acceptance gate through
-`create_escrow_with_acceptance(..., requires_acceptance)`. Existing
-`create_escrow` remains unchanged and sets the flag to `false`.
+`create_escrow_with_acceptance(..., requires_acceptance)`. The existing
+`create_escrow` entry point remains acceptance-opt-out by default.
 
 The designated payee can call `accept` once while the escrow is funded.
 The contract stores the ledger timestamp and returns both the flag and

@@ -1,5 +1,9 @@
 use docforum_escrow::{EscrowContract, EscrowContractClient, EscrowStatus};
-use soroban_sdk::{testutils::Address as _, token::{StellarAssetClient, TokenClient}, Address, Env, String};
+use soroban_sdk::{
+    testutils::Address as _,
+    token::{StellarAssetClient, TokenClient},
+    Address, Env, String,
+};
 
 struct Fixture<'a> {
     client: EscrowContractClient<'a>,
@@ -13,19 +17,36 @@ struct Fixture<'a> {
 
 fn setup(env: &Env) -> Fixture<'_> {
     env.mock_all_auths();
-    let token_id = env.register_stellar_asset_contract_v2(Address::generate(env)).address();
+    let token_id = env
+        .register_stellar_asset_contract_v2(Address::generate(env))
+        .address();
     let token = TokenClient::new(env, &token_id);
     let asset = StellarAssetClient::new(env, &token_id);
     let payer = Address::generate(env);
     let payee = Address::generate(env);
     let releaser = Address::generate(env);
     asset.mint(&payer, &500);
-    let contract_id = env.register(EscrowContract, ());
+    let contract_id = env.register(EscrowContract, (soroban_sdk::Vec::<Address>::new(env),));
     let client = EscrowContractClient::new(env, &contract_id);
     let id = client.create_escrow_with_acceptance(
-        &payer, &payee, &token_id, &300, &String::from_str(env, "acceptance-test"), &releaser, &None, &true,
+        &payer,
+        &payee,
+        &token_id,
+        &300,
+        &String::from_str(env, "acceptance-test"),
+        &releaser,
+        &None,
+        &true,
     );
-    Fixture { client, token, contract_id, payer, payee, releaser, id }
+    Fixture {
+        client,
+        token,
+        contract_id,
+        payer,
+        payee,
+        releaser,
+        id,
+    }
 }
 
 #[test]
@@ -59,15 +80,26 @@ fn acceptance_requires_the_payee_and_only_works_while_funded() {
 fn legacy_creation_keeps_acceptance_opt_out() {
     let env = Env::default();
     env.mock_all_auths();
-    let token_id = env.register_stellar_asset_contract_v2(Address::generate(&env)).address();
+    let token_id = env
+        .register_stellar_asset_contract_v2(Address::generate(&env))
+        .address();
     let token = TokenClient::new(&env, &token_id);
     let payer = Address::generate(&env);
     let payee = Address::generate(&env);
     let releaser = Address::generate(&env);
     StellarAssetClient::new(&env, &token_id).mint(&payer, &100);
-    let contract_id = env.register(EscrowContract, ());
+    let contract_id = env.register(EscrowContract, (soroban_sdk::Vec::<Address>::new(&env),));
     let client = EscrowContractClient::new(&env, &contract_id);
-    let id = client.create_escrow(&payer, &payee, &token_id, &100, &String::from_str(&env, "legacy"), &releaser, &None);
+    let id = client.create_escrow(
+        &payer,
+        &payee,
+        &token_id,
+        &100,
+        &String::from_str(&env, "legacy"),
+        &releaser,
+        &None,
+        &false,
+    );
     let data = client.get_escrow(&id);
     assert!(!data.requires_acceptance);
     assert_eq!(data.accepted_at, None);
