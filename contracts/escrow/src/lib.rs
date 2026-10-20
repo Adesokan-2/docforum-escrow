@@ -68,8 +68,13 @@ pub enum Error {
     /// across `create_escrow`'s transfer (a lying or short-delivering
     /// token) — see docs/threat-model.md T5.
     BalanceMismatch = 6,
+    /// `condition_ref` exceeded the maximum allowed length (currently
+    /// 64 bytes) — see docs/threat-model.md T10 and ROADMAP.md Phase E5.
+    /// Bounded to keep storage and event costs predictable; reject at
+    /// creation so no on-chain storage is wasted on an oversized ref.
+    ConditionRefTooLong = 7,
     /// `token` is not in the immutable deploy-time allowlist.
-    DisallowedToken = 7,
+    DisallowedToken = 8,
     Overflow = 12,
 }
 
@@ -87,8 +92,9 @@ impl EscrowContract {
     }
 
     /// Locks `amount` of `token` pulled from `payer`, held for `payee`,
-    /// tagged with an opaque `condition_ref`. `releaser` is the only
-    /// address that will later be permitted to call `release`/`refund`
+    /// tagged with an opaque `condition_ref` (max 64 bytes — see
+    /// docs/threat-model.md T10 and ROADMAP.md Phase E5). `releaser` is the
+    /// only address that will later be permitted to call `release`/`refund`
     /// on this escrow (see docs/adr/0002). `refund_after` is an optional
     /// unix timestamp after which `refund` opens to any caller, always
     /// back to `payer` (docs/adr/0004); `None` means no timeout.
@@ -128,6 +134,12 @@ impl EscrowContract {
             if deadline <= env.ledger().timestamp() {
                 return Err(Error::InvalidRefundAfter);
             }
+        }
+        // Bound condition_ref to keep per-escrow storage and event costs
+        // predictable (threat model T10, Phase E5). 64 bytes is generous
+        // for a UUID or short label while capping spam risk.
+        if condition_ref.len() > 64 {
+            return Err(Error::ConditionRefTooLong);
         }
         payer.require_auth();
 

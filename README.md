@@ -45,6 +45,7 @@ deployment, so choosing an empty list deliberately disables the protection.
 
 | Function | Status | Description |
 |---|---|---|
+| `create_escrow(payer, payee, token, amount, condition_ref, releaser, refund_after) -> escrow_id` | ✅ Implemented | Pulls `amount` of `token` from `payer` (requires `payer` auth), stores an opaque `condition_ref` (max 64 bytes — Phase E5 bound), sets status `Funded`. Rejects non-positive amounts, any `refund_after` that isn't strictly in the future, and any `condition_ref` longer than 64 bytes (`ConditionRefTooLong`, error 7). |
 | `__constructor(allowed_tokens)` | ✅ Implemented | Stores the immutable deploy-time token allowlist; an empty list allows all tokens. |
 | `create_escrow(payer, payee, token, amount, condition_ref, releaser, refund_after) -> escrow_id` | ✅ Implemented | Pulls `amount` of `token` from `payer` (requires `payer` auth), stores an opaque `condition_ref`, sets status `Funded`. Rejects non-positive amounts, and any `refund_after` that isn't strictly in the future. |
 | `get_status(escrow_id) -> EscrowStatus` | ✅ Implemented | Read-only. Errors on an unknown id. |
@@ -67,7 +68,11 @@ for the decision and what it means for payees.
 call `release`/`refund`, never **why**. `condition_ref` is an opaque
 string the contract stores but never interprets — all domain
 interpretation (what counts as "fulfilled," who's authorized to attest to
-it) is the consuming application's job. See
+it) is the consuming application's job. The contract bounds `condition_ref`
+to 64 bytes at creation (error 7, `ConditionRefTooLong`) to keep storage
+and event costs predictable (threat model T10, Phase E5); the SDK
+validates the same bound client-side via `MAX_CONDITION_REF_LENGTH`.
+See
 [ADR 0001](docs/adr/0001-generic-escrow-not-healthcare-specific.md).
 
 ## How it's used
